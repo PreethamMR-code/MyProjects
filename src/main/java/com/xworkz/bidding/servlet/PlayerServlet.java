@@ -17,7 +17,6 @@ public class PlayerServlet extends HttpServlet {
 
     PlayerService playerService = new PlayerServiceImpl();
 
-
     public PlayerServlet(){
         System.out.println("player servlet object created");
     }
@@ -25,44 +24,58 @@ public class PlayerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-        System.out.println("DO POST stated");
+
+        System.out.println("PlayerServlet doPost started");
         resp.setContentType("text/html");
 
-        String playerName = req.getParameter("playerName");
-        int age = Integer.parseInt(req.getParameter("age"));
-        String playerType = req.getParameter("playerType");
-        double battingAvg = Double.parseDouble(req.getParameter("battingAvg"));
-        double bowlingAvg = Double.parseDouble(req.getParameter("bowlingAvg"));
-        int stumpings = Integer.parseInt(req.getParameter("stumpings"));
-        String state = req.getParameter("state");
-        int bidCount = Integer.parseInt(req.getParameter("bidCount"));
-        String soldTo = req.getParameter("soldTo");
+        try {
+            // SAFE PARAMETER EXTRACTION with NULL checks
+            String playerName = req.getParameter("playerName");
+            String ageStr = req.getParameter("age");
+            String playerType = req.getParameter("playerType");
+            String battingAvgStr = req.getParameter("battingAvg");
+            String bowlingAvgStr = req.getParameter("bowlingAvg");
+            String stumpingsStr = req.getParameter("stumpings");
+            String state = req.getParameter("state");
 
-        PlayerDTO playerDTO = new PlayerDTO(playerName,age,playerType,battingAvg,bowlingAvg,stumpings,state,bidCount,soldTo);
+            // VALIDATE non-null first
+            if (playerName == null || playerType == null || state == null) {
+                req.setAttribute("error", "Required fields missing!");
+                req.getRequestDispatcher("registration.jsp").forward(req, resp);
+                return;
+            }
 
+            // SAFE PARSING with defaults
+            int age = ageStr != null ? Integer.parseInt(ageStr) : 0;
+            double battingAvg = battingAvgStr != null ? Double.parseDouble(battingAvgStr) : 0.0;
+            double bowlingAvg = bowlingAvgStr != null ? Double.parseDouble(bowlingAvgStr) : 0.0;
+            int stumpings = stumpingsStr != null ? Integer.parseInt(stumpingsStr) : 0;
 
-        try{
-            playerService.validateAndSave(playerDTO);
+            // NO bidCount/soldTo needed for NEW players!
+            PlayerDTO playerDTO = new PlayerDTO(playerName, age, playerType, battingAvg, bowlingAvg, stumpings, state, 0, null);
 
+            System.out.println("PlayerDTO: " + playerDTO);
 
-            req.setAttribute("playerName",playerName);
-            req.setAttribute("age",age);
-            req.setAttribute("playerType",playerType);
-            req.setAttribute("battingAvg",battingAvg);
-            req.setAttribute("bowlingAvg",bowlingAvg);
-            req.setAttribute("stumpings",stumpings);
-            req.setAttribute("state",state);
+            // Call service
+            boolean saved = playerService.validateAndSave(playerDTO);
 
+            if (saved) {
+                req.setAttribute("success", "Player registered successfully!");
+                req.setAttribute("playerName", playerName);
+            } else {
+                req.setAttribute("fail", "Registration failed! Check data.");
+            }
 
-            RequestDispatcher requestDispatcher = req.getRequestDispatcher("result.jsp");
-            requestDispatcher.forward(req,resp);
+            req.getRequestDispatcher("result.jsp").forward(req, resp);
 
-            System.out.println("realEstateDTO: "+playerDTO);
-
-        }catch (Exception e){
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", "Invalid number format! Check age/averages.");
             e.printStackTrace();
+            req.getRequestDispatcher("registration.jsp").forward(req, resp);
+        } catch (Exception e) {
+            req.setAttribute("error", "Unexpected error occurred.");
+            e.printStackTrace();
+            req.getRequestDispatcher("registration.jsp").forward(req, resp);
         }
-
-        System.out.println("Do post ended");
     }
 }

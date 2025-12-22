@@ -1,5 +1,6 @@
 package com.xworkz.bidding.dao;
 
+import com.xworkz.bidding.dto.BidDTO;
 import com.xworkz.bidding.dto.CompanyDTO;
 import com.xworkz.bidding.dto.PlayerDTO;
 import com.xworkz.bidding.dto.SearchDTO;
@@ -14,5 +15,10 @@ public interface PlayerDAO {
     Optional<CompanyDTO> findByEmail(CompanyDTO companyDTO);
 
     List<PlayerDTO> findPlayersForBidding(SearchDTO searchDTO);
+
+    PlayerDTO findByPlayerName(String playerName);
+
+    boolean placeBid(BidDTO bidDTO);
+
 
 }

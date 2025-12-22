@@ -1,6 +1,7 @@
 package com.xworkz.bidding.servlet;
 
 
+import com.xworkz.bidding.dto.BidDTO;
 import com.xworkz.bidding.dto.CompanyDTO;
 import com.xworkz.bidding.service.PlayerService;
 import com.xworkz.bidding.service.PlayerServiceImpl;
@@ -27,31 +28,37 @@ public class PlaceBidServlet extends HttpServlet {
 
         System.out.println("PlaceBidServlet doPost started");
 
-        // 1. Get player name & bid amount
-        String playerName = req.getParameter("playerName");
-        double bidAmount = Double.parseDouble(req.getParameter("bidAmount"));
+        try {
+            // 1. Extract form parameters
+            String playerName = req.getParameter("playerName");
+            String companyName = req.getParameter("companyName");
+            double bidAmount = Double.parseDouble(req.getParameter("bidAmount"));
 
+            // 2. Create DTO
+            BidDTO bidDTO = new BidDTO(playerName, companyName, bidAmount);
+            System.out.println("Bid received: " + bidDTO);
 
-        // 2. Get company from session (SIMPLE & CLEAN)
-        CompanyDTO companyDTO =
-                (CompanyDTO) req.getSession().getAttribute("companyDTO");
+            // 3. Call service
+            boolean bidPlaced = playerService.placeBid(bidDTO);
 
-        // Safety check (optional but good)
-        if (companyDTO == null) {
-            req.setAttribute("error", "Session expired. Please login again.");
-            req.getRequestDispatcher("company.jsp").forward(req, resp);
-            return;
+            if (bidPlaced) {
+                req.setAttribute("success", " Bid placed successfully for " + playerName + "!");
+                req.setAttribute("bid", bidDTO);
+            } else {
+                req.setAttribute("error", " Failed to place bid. Please check details and try again.");
+            }
+
+        } catch (NumberFormatException e) {
+            req.setAttribute("error", " Invalid bid amount. Please enter a valid number.");
+            System.out.println("Invalid bid amount: " + e.getMessage());
+        } catch (Exception e) {
+            req.setAttribute("error", " An error occurred. Please try again.");
+            e.printStackTrace();
         }
 
-        String companyName = companyDTO.getCompanyName();
-
-        // 3. Call service
-        boolean bidPlaced =
-                playerService.placeBid(playerName, bidAmount, companyName);
-
-        // 4. Redirect back to bidding page
+        // 4. Forward to JSP (same page for success/error)
         req.getRequestDispatcher("bidding.jsp").forward(req, resp);
 
         System.out.println("PlaceBidServlet doPost ended");
-    }
+  }
 }
