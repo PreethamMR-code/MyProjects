@@ -2,6 +2,7 @@ package com.xworkz.bidding.service;
 
 import com.xworkz.bidding.dao.PlayerDAO;
 import com.xworkz.bidding.dao.PlayerDaoImpl;
+import com.xworkz.bidding.dto.BidDTO;
 import com.xworkz.bidding.dto.CompanyDTO;
 import com.xworkz.bidding.dto.PlayerDTO;
 import com.xworkz.bidding.dto.SearchDTO;
@@ -51,7 +52,7 @@ public class PlayerServiceImpl implements PlayerService {
             }
 
             if (playerDTO.getState() == null || playerDTO.getState().length() < 5) {
-                System.out.println("state avg not valid");
+                System.out.println("state name not valid");
                 invalid = true;
             }
         }
@@ -67,7 +68,7 @@ public class PlayerServiceImpl implements PlayerService {
                 invalid = true;
             }
         }
-        return invalid;
+        return !invalid;
 
     }
 
@@ -76,11 +77,13 @@ public class PlayerServiceImpl implements PlayerService {
     public Optional<CompanyDTO> validateAndLogin(CompanyDTO companyDTO) {
 
         System.out.println("validation started");
+
         if (companyDTO == null) {
             return Optional.empty();
         }
 
         System.out.println("company dto is checked and is not null");
+
         String email = companyDTO.getEmail();
 
         System.out.println("company dto is checked ");
@@ -141,8 +144,54 @@ public class PlayerServiceImpl implements PlayerService {
             System.out.println("validation is done and saved to DB:" + saved);
             return saved;
         } else {
-            return null;
+            return null;// List.of();
+
         }
 
+    }
+
+    @Override
+    public boolean placeBid(BidDTO bidDTO) {
+
+        System.out.println("PlaceBid validation started");
+
+        if (bidDTO == null) {
+            System.out.println("BidDTO is null");
+            return false;
+        }
+
+        if (bidDTO.getPlayerName() == null || bidDTO.getPlayerName().isEmpty()) {
+            System.out.println("Player name invalid");
+            return false;
+        }
+
+        if (bidDTO.getCompanyName() == null || bidDTO.getCompanyName().isEmpty()) {
+            System.out.println("Company name invalid");
+            return false;
+        }
+
+        if (bidDTO.getBidAmount() <= 0) {
+            System.out.println("Bid amount invalid");
+            return false;
+        }
+
+        // SINGLE DAO CALL - Check BEFORE increment
+        PlayerDTO player = playerDAO.findByPlayerName(bidDTO.getPlayerName());
+        System.out.println("player is present you can bid now");
+
+        if (player == null) {
+            System.out.println("Player not found");
+            return false;
+        }
+
+        // ✅ FIXED: Allow 3 bids total (block when bid_count >= 3)
+        if (player.getBidCount() >= 3) {
+            System.out.println("Bid limit reached for " + bidDTO.getPlayerName());
+            return false;
+        }
+
+        // DAO handles increment + winner logic perfectly
+        System.out.println("Let DAO insert bid, increment count, and set winner after 3rd bid");
+        return playerDAO.placeBid(bidDTO);
     }
 }

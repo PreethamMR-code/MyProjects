@@ -1,5 +1,6 @@
 package com.xworkz.bidding.service;
 
+import com.xworkz.bidding.dto.BidDTO;
 import com.xworkz.bidding.dto.CompanyDTO;
 import com.xworkz.bidding.dto.PlayerDTO;
 import com.xworkz.bidding.dto.SearchDTO;
@@ -15,7 +16,6 @@ public interface PlayerService {
 
     List<PlayerDTO> findPlayersForBidding(SearchDTO searchDTO);
 
-    boolean placeBid(String playerName, double bidAmount, String companyName);
-
+    boolean placeBid(BidDTO bidDTO);
 
 }

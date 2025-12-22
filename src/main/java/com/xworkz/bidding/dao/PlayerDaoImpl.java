@@ -1,5 +1,6 @@
 package com.xworkz.bidding.dao;
 
+import com.xworkz.bidding.dto.BidDTO;
 import com.xworkz.bidding.dto.CompanyDTO;
 import com.xworkz.bidding.dto.PlayerDTO;
 import com.xworkz.bidding.dto.SearchDTO;
@@ -77,6 +78,7 @@ public class PlayerDaoImpl implements PlayerDAO {
 
             if (resultSet.next()) {
 
+
                 String companyName = resultSet.getString(1);
                 String gmail = resultSet.getString(2);
 
@@ -123,8 +125,9 @@ public class PlayerDaoImpl implements PlayerDAO {
                 double  bowlingAvg = resultSet.getDouble("bowlingAvg");
                 int stumpings = resultSet.getInt("stumpings");
                 String state = resultSet.getString("state");
-                int bidCount = resultSet.getInt("bidCount");
-                String soldTo = resultSet.getString("soldTo");
+                int bidCount = resultSet.getInt("bid_count");
+                String soldTo = resultSet.getString("sold_to");
+
 
 
                 PlayerDTO playerDTO = new PlayerDTO(playerName, age, playerType,  battingAvg, bowlingAvg, stumpings, state,bidCount,soldTo);
@@ -136,6 +139,112 @@ public class PlayerDaoImpl implements PlayerDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+
+    @Override
+    @SneakyThrows
+    public PlayerDTO findByPlayerName(String playerName) {
+        String sql = "SELECT * FROM auction WHERE playerName = ?";
+
+        try (Connection connection = getConnection(URL, USER, PASS);
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, playerName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return new PlayerDTO(
+                        resultSet.getString("playerName"),
+                        resultSet.getInt("age"),
+                        resultSet.getString("playerType"),
+                        resultSet.getDouble("battingAvg"),
+                        resultSet.getDouble("bowlingAvg"),
+                        resultSet.getInt("stumpings"),
+                        resultSet.getString("state"),
+                        resultSet.getInt("bid_count"),
+                        resultSet.getString("sold_to")
+                );
+            }
+        }
+        return null;
+    }
+
+
+    @Override
+    @SneakyThrows
+    public boolean placeBid(BidDTO bidDTO) {
+
+        String playerName = bidDTO.getPlayerName();
+        String companyName = bidDTO.getCompanyName();
+        double bidAmount = bidDTO.getBidAmount();
+
+        String insertBid = "INSERT INTO bid (player_name, company_name, bid_amount) VALUES (?, ?, ?)";
+
+        try (Connection connection = getConnection(URL, USER, PASS);
+             PreparedStatement preparedStatement = connection.prepareStatement(insertBid)) {
+
+            preparedStatement.setString(1, playerName);
+            preparedStatement.setString(2, companyName);
+            preparedStatement.setDouble(3, bidAmount);
+
+            int rowsInserted = preparedStatement.executeUpdate();
+            if (rowsInserted == 0) return false;
+
+
+
+
+
+            System.out.println("proceed to update bid count and possibly set winner (after 3rd bid");
+            return updateBidCountAndCheckWinner(connection, playerName);
+        }
+    }
+
+    @SneakyThrows
+    private boolean updateBidCountAndCheckWinner(Connection connection, String playerName) {
+        String getBidCount = "SELECT bid_count FROM auction WHERE playerName = ?";
+        try (PreparedStatement psCount = connection.prepareStatement(getBidCount)) {
+            psCount.setString(1, playerName);
+            ResultSet rs = psCount.executeQuery();
+
+            if (!rs.next()) return false;
+
+            int bidCount = rs.getInt("bid_count") + 1;
+
+            String updateCount = "UPDATE auction SET bid_count = ? WHERE playerName = ?";
+            try (PreparedStatement psUpdate = connection.prepareStatement(updateCount)) {
+                psUpdate.setInt(1, bidCount);
+                psUpdate.setString(2, playerName);
+
+                if (psUpdate.executeUpdate() == 0) return false;
+
+                if (bidCount == 3) {
+                    return findAndSetWinner(connection, playerName);
+                }
+                return true;
+            }
+        }
+
+    }
+
+    @SneakyThrows
+    private boolean findAndSetWinner(Connection connection, String playerName) {
+        String getWinner = "SELECT company_name FROM bid WHERE player_name = ? ORDER BY bid_amount DESC LIMIT 1";
+        try (PreparedStatement psWinner = connection.prepareStatement(getWinner)) {
+            psWinner.setString(1, playerName);
+            ResultSet rs = psWinner.executeQuery();
+
+            if (rs.next()) {
+                String winner = rs.getString("company_name");
+                String updateWinner = "UPDATE auction SET sold_to = ? WHERE playerName = ?";
+                try (PreparedStatement psUpdateWinner = connection.prepareStatement(updateWinner)) {
+                    psUpdateWinner.setString(1, winner);
+                    psUpdateWinner.setString(2, playerName);
+                    return psUpdateWinner.executeUpdate() > 0;
+                }
+            }
+            return false;
+        }
     }
 
 }

@@ -39,16 +39,16 @@ public class SearchPlayersServlet extends HttpServlet {
 
 
         // Call service
-        List<PlayerDTO> saved = playerService.findPlayersForBidding(searchDTO);
-        System.out.println(saved);
+        List<PlayerDTO> resultList = playerService.findPlayersForBidding(searchDTO);
+        System.out.println(resultList);
 
 
-        if (saved.isEmpty()) {
+        if (resultList.isEmpty()) {
             req.setAttribute("error", "Players not found ");
             req.getRequestDispatcher("bidding.jsp").forward(req, resp);
         }else {
             req.setAttribute("success","players listed");
-            req.setAttribute("players",saved);
+            req.setAttribute("players",resultList);
             req.getRequestDispatcher("bidding.jsp").forward(req,resp);
 
         }

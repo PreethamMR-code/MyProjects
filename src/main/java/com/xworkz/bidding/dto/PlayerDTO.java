@@ -18,6 +18,4 @@ public class PlayerDTO {
     private String  state;
     private int bidCount;
     private String soldTo;
-
-
 }
