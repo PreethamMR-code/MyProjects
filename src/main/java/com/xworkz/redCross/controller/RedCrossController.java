@@ -71,4 +71,22 @@ public class RedCrossController {
         }
     }
 
+    @GetMapping("/deleteDonor")
+    public String deleteDonor(@RequestParam("id") int id, Model model) {
+
+        System.out.println("Deleting donor with id: " + id);
+
+        boolean deleted = redCrossService.deleteDonorById(id);
+
+        if (deleted) {
+            model.addAttribute("success", "Donor deleted successfully");
+        } else {
+            model.addAttribute("error", "Donor not found or deletion failed");
+        }
+
+        return "search";
+    }
+
+
+
 }

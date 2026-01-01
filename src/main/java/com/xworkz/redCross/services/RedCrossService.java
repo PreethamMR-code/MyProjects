@@ -11,4 +11,7 @@ public interface RedCrossService {
    Optional<DonarAccountDto> getDonorByEmail(String email);
 
    boolean updateDonor(DonarAccountDto donarAccountDto);
+
+
+   boolean deleteDonorById(int id);
 }

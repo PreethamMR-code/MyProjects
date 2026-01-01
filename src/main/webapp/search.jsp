@@ -88,6 +88,23 @@
                                 </button>
                             </form>
 
+                          <%--  //delete using email
+                            <form action="deleteDonor" method="get">
+                                <input type="hidden" name="email" value="${donor.email}">
+                                <button type="submit" class="btn btn-danger">
+                                    Delete Donor
+                                </button>
+                            </form>
+                            // delete using ID --%>
+                            <form action="deleteDonor" method="get">
+                                <input type="hidden" name="id" value="${donor.id}">
+                                <button type="submit" class="btn btn-danger">
+                                    Delete
+                                </button>
+                            </form>
+
+
+
                 </div>
             </div>
 

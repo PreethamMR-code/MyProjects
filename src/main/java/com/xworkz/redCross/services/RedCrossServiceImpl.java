@@ -95,4 +95,16 @@ public class RedCrossServiceImpl implements RedCrossService{
         }
     }
 
+    @Override
+    public boolean deleteDonorById(int id) {
+
+        if (id > 0) {
+            return redCrossDao.deleteById(id);
+        }
+
+        return false;
+    }
+
+
+
 }

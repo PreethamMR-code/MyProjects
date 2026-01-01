@@ -10,4 +10,8 @@ public interface RedCrossDao {
     Optional<DonarAccountDto> getDonarByEmail(String email);
 
     boolean update(DonarAccountDto donarAccountDto);
+
+  //  boolean deleteByEmail(String email);
+
+    boolean deleteById(int id);
 }
