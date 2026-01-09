@@ -2,6 +2,8 @@ package com.xworkz.redCross.services;
 
 import com.xworkz.redCross.dao.RedCrossDao;
 import com.xworkz.redCross.dto.DonarAccountDto;
+import com.xworkz.redCross.entity.RedCrossEntity;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +68,9 @@ public class RedCrossServiceImpl implements RedCrossService{
 
 
         if (valid) {
-            boolean saved = redCrossDao.save(donarAccountDto);
+            RedCrossEntity redCrossEntity = new RedCrossEntity();
+            BeanUtils.copyProperties(donarAccountDto,redCrossEntity);
+            boolean saved = redCrossDao.save(redCrossEntity);
             System.out.println("Saved to DB: " + saved);
             return saved;
         }

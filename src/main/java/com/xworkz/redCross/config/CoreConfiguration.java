@@ -64,6 +64,7 @@ public class CoreConfiguration implements WebMvcConfigurer {
     @Bean
     public LocalContainerEntityManagerFactoryBean getEntityManagerFactoryBean(){
         LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactory = new LocalContainerEntityManagerFactoryBean();
+
         localContainerEntityManagerFactory.setDataSource(getDataSource());
         localContainerEntityManagerFactory.setPackagesToScan("com.xworkz.redCross.entity");
         localContainerEntityManagerFactory.setJpaProperties(getJpaProperties());
