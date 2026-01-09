@@ -1,6 +1,7 @@
 package com.xworkz.redCross.dao;
 
 import com.xworkz.redCross.dto.DonarAccountDto;
+import com.xworkz.redCross.entity.RedCrossEntity;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -21,11 +22,11 @@ public class RedCrossHibernateImpl implements RedCrossDao {
 
 
     @Override
-    public boolean save(DonarAccountDto donarAccountDto) {
+    public boolean save( RedCrossEntity redCrossEntity) {
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        entityManager.persist(donarAccountDto);
+        entityManager.persist(redCrossEntity);
         entityManager.getTransaction().commit();
         return true;
 
