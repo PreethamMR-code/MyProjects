@@ -5,27 +5,30 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.Optional;
 
 @Repository
 public class RedCrossHibernateImpl implements RedCrossDao {
 
+    @Autowired
+    EntityManagerFactory entityManagerFactory;
+
 
     @Override
     public boolean save(DonarAccountDto donarAccountDto) {
 
-        Configuration configuration = new Configuration();
-        configuration.configure();
-        configuration.addAnnotatedClass(DonarAccountDto.class);
-        SessionFactory sessionFactory = configuration.buildSessionFactory();
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
-        session.save(donarAccountDto);
-        transaction.commit();
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.persist(donarAccountDto);
+        entityManager.getTransaction().commit();
         return true;
+
     }
 
     @Override
