@@ -71,7 +71,8 @@
                     <c:if test="${not empty donor}">
                         <div class="alert alert-success mt-3">
                             <h6>Donor Found</h6>
-                            <p><b>Name:</b> ${donor.firstName} ${donor.lastName}</p>
+                             <p><b>Id:</b> ${donor.getDonorID()}</p>
+                            <p><b>Name:</b> ${donor.getFirstName()} ${donor.lastName}</p>
                             <p><b>Email:</b> ${donor.email}</p>
                             <p><b>DOB:</b> ${donor.dob}</p>
                             <p><b>ZIP:</b> ${donor.zipCode}</p>
@@ -97,7 +98,7 @@
                             </form>
                             // delete using ID --%>
                             <form action="deleteDonor" method="get">
-                                <input type="hidden" name="id" value="${donor.id}">
+                                <input type="hidden" name="id" value="${donor.getDonorID()}">
                                 <button type="submit" class="btn btn-danger">
                                     Delete
                                 </button>

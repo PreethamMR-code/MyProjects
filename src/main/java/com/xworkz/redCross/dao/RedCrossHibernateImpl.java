@@ -22,7 +22,7 @@ public class RedCrossHibernateImpl implements RedCrossDao {
 
 
     @Override
-    public boolean save( RedCrossEntity redCrossEntity) {
+    public boolean save(RedCrossEntity redCrossEntity) {
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
@@ -33,9 +33,16 @@ public class RedCrossHibernateImpl implements RedCrossDao {
     }
 
     @Override
-    public Optional<DonarAccountDto> getDonarByEmail(String email) {
+    public Optional<RedCrossEntity> getDonarByEmail(String email) {
 
-        return Optional.empty();
+        System.out.println("dao" + email);
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        RedCrossEntity entity =entityManager.find(RedCrossEntity.class,email);
+//        RedCrossEntity entity = (RedCrossEntity) entityManager.createQuery("select entity from RedCrossEntity entity where entity.email=:email").setParameter("email", email).getSingleResult();
+
+        System.out.println(entity);
+
+        return Optional.of(entity);
     }
 
     @Override
@@ -65,37 +72,37 @@ public class RedCrossHibernateImpl implements RedCrossDao {
 //        return true;
 
 
-        @Override
-        public boolean deleteById ( int id){
+    @Override
+    public boolean deleteById(int id) {
 
-            boolean isDonorDeleted = false;
+        boolean isDonorDeleted = false;
 
-            Session session = new Configuration()
-                    .configure()
-                    .addAnnotatedClass(DonarAccountDto.class)
-                    .buildSessionFactory()
-                    .openSession();
+        Session session = new Configuration()
+                .configure()
+                .addAnnotatedClass(DonarAccountDto.class)
+                .buildSessionFactory()
+                .openSession();
 
-            Transaction transaction = session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
 
-            // fetch donor using PRIMARY KEY (id)
-            DonarAccountDto donarAccountDto = session.get(DonarAccountDto.class, id);
+        // fetch donor using PRIMARY KEY (id)
+        DonarAccountDto donarAccountDto = session.get(DonarAccountDto.class, id);
 
-            if (donarAccountDto != null) {
+        if (donarAccountDto != null) {
 
-                // DELETE (not save)
-                session.delete(donarAccountDto);
+            // DELETE (not save)
+            session.delete(donarAccountDto);
 
-                transaction.commit();
-                isDonorDeleted = true;
-            } else {
-                transaction.rollback();
-            }
-
-            session.close();
-            return isDonorDeleted;
+            transaction.commit();
+            isDonorDeleted = true;
+        } else {
+            transaction.rollback();
         }
 
+        session.close();
+        return isDonorDeleted;
     }
+
+}
 
 
