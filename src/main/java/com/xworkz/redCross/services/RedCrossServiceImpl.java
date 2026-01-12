@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class RedCrossServiceImpl implements RedCrossService{
+public class RedCrossServiceImpl implements RedCrossService {
 
     @Autowired
     RedCrossDao redCrossDao;
@@ -69,7 +69,7 @@ public class RedCrossServiceImpl implements RedCrossService{
 
         if (valid) {
             RedCrossEntity redCrossEntity = new RedCrossEntity();
-            BeanUtils.copyProperties(donarAccountDto,redCrossEntity);
+            BeanUtils.copyProperties(donarAccountDto, redCrossEntity);
             boolean saved = redCrossDao.save(redCrossEntity);
             System.out.println("Saved to DB: " + saved);
             return saved;
@@ -80,19 +80,34 @@ public class RedCrossServiceImpl implements RedCrossService{
 
     @Override
     public Optional<DonarAccountDto> getDonorByEmail(String email) {
+
+        System.out.println("servive : " + email);
+
         if (email != null) {
-            return redCrossDao.getDonarByEmail(email);
-        } else {
+            DonarAccountDto dto1 = new DonarAccountDto();
+
+            Optional<RedCrossEntity> entity = redCrossDao.getDonarByEmail(email);
+            if (entity.isPresent()) {
+                RedCrossEntity e = entity.get();
+                System.out.println("entity : ===" + entity);
+
+                BeanUtils.copyProperties(e, dto1);
+
+                System.out.println("dto: ---" + dto1);
+
+            }
+            return Optional.of(dto1);
+        } else
 
             return Optional.empty();
-        }
+
+
     }
 
     @Override
     public boolean updateDonor(DonarAccountDto donarAccountDto) {
 
-        if (donarAccountDto == null || donarAccountDto.getEmail() == null)
-        {
+        if (donarAccountDto == null || donarAccountDto.getEmail() == null) {
             return false;
         } else {
             return redCrossDao.update(donarAccountDto);
@@ -108,7 +123,6 @@ public class RedCrossServiceImpl implements RedCrossService{
 
         return false;
     }
-
 
 
 }

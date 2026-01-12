@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface RedCrossDao {
     boolean save(RedCrossEntity redCrossEntity);
 
-    Optional<DonarAccountDto> getDonarByEmail(String email);
+    Optional<RedCrossEntity> getDonarByEmail(String email);
 
     boolean update(DonarAccountDto donarAccountDto);
 

@@ -16,9 +16,10 @@ import javax.persistence.Table;
 @Table(name = "donor_account")
 public class RedCrossEntity {
 
-    @Id
+
     @Column(name = "donor_account_id")
     private int donorID;
+    @Id
     @Column(name = "email")
     private String email;
     @Column(name = "first_name")
